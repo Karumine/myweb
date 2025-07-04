@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM System Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f0f8ff;
+        }
+
+        .bg-main {
+            background-color: #e3f2fd;
+        }
+
+        .text-accent {
+            color: #0288d1;
+        }
+
+        .btn-main {
+            background-color: #81d4fa;
+            color: white;
+            font-weight: 500;
+        }
+
+        .btn-main:hover {
+            background-color: #4fc3f7;
+        }
+
+        .btn-green {
+            background-color: #a5d6a7;
+        }
+
+        .btn-green:hover {
+            background-color: #81c784;
+        }
+
+        .rounded-xl {
+            border-radius: 1rem;
+        }
+
+        .shadow-soft {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .loading-text {
+            color: #0288d1;
+            font-weight: 500;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.3;
+            }
+        }
+    </style>
+
+    <style>
+        .modal-header {
+            background-color: #e1f5fe;
+            /* ฟ้าอ่อน */
+            color: #0277bd;
+        }
+
+        .hover\:bg-blue-50:hover {
+            background-color: #e3f2fd;
+        }
+
+        .rounded-xl {
+            border-radius: 1rem;
+        }
+
+        .shadow-lg {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-blue-100 text-blue-900 min-h-screen shadow-md">
+            <div class="px-6 py-4 text-xl font-bold border-b border-blue-200">💼 CRM System</div>
+            <div class="px-6 text-sm mb-4">ระบบจัดการลูกค้า</div>
+            <nav>
+                <ul>
+                    <li class="block px-6 py-3 bg-blue-200 rounded-l-full">📊 Dashboard</li>
+                    <li><a href="CRM-Customer-Page.html" class="block px-6 py-3 hover:bg-blue-200">👥 ลูกค้า</a>
+                    <li><a href="CRM-Appointment-Page.html" class="block px-6 py-3 hover:bg-blue-200">📅 นัดหมาย</a>
+                    </li>
+                    <li><a href="#" class="block px-6 py-3 hover:bg-blue-200">📈 รายงาน</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <h1 class="text-2xl font-bold mb-6 text-accent">📋 Dashboard</h1>
+
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white p-4 rounded-xl shadow-soft flex items-center">
+                    <div class="text-3xl mr-4">👥</div>
+                    <div>
+                        <div class="text-sm">จำนวนลูกค้าทั้งหมด</div>
+                        <div class="text-xl font-bold">0</div>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-soft flex items-center border-t-4 border-yellow-400">
+                    <div class="text-3xl mr-4">⏰</div>
+                    <div>
+                        <div class="text-sm">ลูกค้าที่ต้องติดตามวันนี้</div>
+                        <div class="text-xl font-bold">0</div>
+                    </div>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-soft flex items-center border-t-4 border-green-400">
+                    <div class="text-3xl mr-4">✅</div>
+                    <div>
+                        <div class="text-sm">ปิดการขายเดือนนี้</div>
+                        <div class="text-xl font-bold">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task & Status Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-soft">
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-lg font-bold">งานที่ใกล้ถึงกำหนด</h2>
+                        <span class="text-sm text-blue-600">3 วันถัดไป</span>
+                    </div>
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="text-left">
+                                <th class="py-2">วันที่</th>
+                                <th>ลูกค้า</th>
+                                <th>วัตถุประสงค์</th>
+                                <th>สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="py-2" colspan="4">กำลังโหลด...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl shadow-soft">
+                    <h2 class="text-lg font-bold mb-2">ลูกค้าตามสถานะ</h2>
+                    <!-- Add chart or summary here -->
+                    <p class="text-sm text-gray-500">(ไม่มีข้อมูล)</p>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

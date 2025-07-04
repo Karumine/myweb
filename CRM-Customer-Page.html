@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายการลูกค้า - CRM</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f0f8ff;
+        }
+
+        .bg-main {
+            background-color: #e3f2fd;
+        }
+
+        .text-accent {
+            color: #0288d1;
+        }
+
+        .btn-main {
+            background-color: #81d4fa;
+            color: white;
+            font-weight: 500;
+        }
+
+        .btn-main:hover {
+            background-color: #4fc3f7;
+        }
+
+        .btn-green {
+            background-color: #a5d6a7;
+        }
+
+        .btn-green:hover {
+            background-color: #81c784;
+        }
+
+        .rounded-xl {
+            border-radius: 1rem;
+        }
+
+        .shadow-soft {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .loading-text {
+            color: #0288d1;
+            font-weight: 500;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.3;
+            }
+        }
+
+        /* ถ้าต้องการใช้สีส้มพาสเทล */
+        .bg-orange-300 {
+            background-color: #FFB74D;
+            /* สีส้มพาสเทล */
+        }
+
+        .bg-orange-100 {
+            background-color: #FFE0B2;
+            /* สีพื้นหลังเบา */
+        }
+    </style>
+    <style>
+        .modal-header {
+            background-color: #e1f5fe;
+            /* ฟ้าอ่อน */
+            color: #0277bd;
+        }
+
+        .hover\:bg-blue-50:hover {
+            background-color: #e3f2fd;
+        }
+
+        .rounded-xl {
+            border-radius: 1rem;
+        }
+
+        .shadow-lg {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex">
+        <aside class="w-64 bg-blue-100 text-blue-900 min-h-screen shadow-md">
+            <div class="px-6 py-4 text-xl font-bold border-b border-blue-200">💼 CRM System</div>
+            <div class="px-6 text-sm mb-4">ระบบจัดการลูกค้า</div>
+            <nav>
+                <ul>
+                    <li><a href="CRM-Dashboard-Layout.html" class="block px-6 py-3 hover:bg-blue-200">📊 Dashboard</a></li>
+                    <li class="block px-6 py-3 bg-blue-200 rounded-l-full">👥 ลูกค้า</li>
+                    <li><a href="CRM-Appointment-Page.html" class="block px-6 py-3 hover:bg-blue-200">📅 นัดหมาย</a></li>
+                    <li><a href="#" class="block px-6 py-3 hover:bg-blue-200">📈 รายงาน</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-2xl font-bold text-accent">📋 รายการลูกค้า</h1>
+                <button onclick="document.getElementById('addCustomerModal').classList.remove('hidden')"
+                    class="btn-green px-4 py-2 rounded-xl shadow-soft">➕ เพิ่มลูกค้า</button>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-soft">
+                <h2 class="text-lg font-semibold mb-4">👤 รายการลูกค้าทั้งหมด</h2>
+                <div class="flex mb-4 space-x-4">
+                    <input type="text" id="searchInput" placeholder="ค้นหาลูกค้า..."
+                        class="flex-1 px-4 py-2 border rounded w-1/2">
+                </div>
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-blue-50 text-left">
+                            <th class="py-2 px-3">ชื่อลูกค้า / บริษัท</th>
+                            <th class="px-3">ช่องทาง</th>
+                            <th class="px-3">รายละเอียด</th>
+                            <th class="px-3">ผลจากการติดต่อ</th>
+                            <th class="px-3">การจัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customerTable">
+                        <tr id="loadingRow">
+                            <td colspan="5" class="text-center py-4 loading-text">⏳ กำลังโหลดข้อมูล...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl shadow-soft w-full max-w-xl">
+            <div class="bg-blue-100 text-blue-800 px-4 py-3 rounded-t-xl flex justify-between items-center">
+                <h2 class="text-lg font-bold">🔍 รายละเอียดลูกค้า</h2>
+                <button onclick="document.getElementById('detailModal').classList.add('hidden')">✕</button>
+            </div>
+            <div id="detailContent" class="p-6 grid grid-cols-2 gap-x-4 gap-y-2 text-sm"></div>
+        </div>
+    </div>
+
+    <div id="addCustomerModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl shadow-soft w-full max-w-xl">
+            <div class="bg-green-100 text-green-800 px-4 py-3 rounded-t-xl flex justify-between items-center">
+                <h2 id="modalTitle" class="text-lg font-bold">➕ เพิ่มลูกค้าใหม่</h2>
+                <button onclick="document.getElementById('addCustomerModal').classList.add('hidden')">✕</button>
+            </div>
+            <form id="addCustomerForm" class="p-6 grid grid-cols-2 gap-4 text-sm">
+                <input type="text" name="name" placeholder="ชื่อลูกค้า (ไทย)" class="border px-2 py-1 rounded">
+                <input type="text" name="englishName" placeholder="ชื่อลูกค้า (อังกฤษ)" class="border px-2 py-1 rounded"> <input type="text" name="companyName" placeholder="ชื่อบริษัท" class="border px-2 py-1 rounded">
+                <input type="text" name="telephone" placeholder="เบอร์โทรศัพท์" class="border px-2 py-1 rounded">
+                <input type="email" name="email" placeholder="อีเมล" class="border px-2 py-1 rounded">
+                <input type="url" name="companyWebpage" placeholder="เว็บไซต์บริษัท" class="border px-2 py-1 rounded col-span-2">
+                <input type="text" name="group" placeholder="กลุ่ม" class="border px-2 py-1 rounded">
+                <input type="text" name="type" placeholder="ประเภทนักลงทุน" class="border px-2 py-1 rounded">
+                <input type="text" name="investmentType" placeholder="ประเภทการลงทุน" class="border px-2 py-1 rounded">
+                <input type="text" name="channel" placeholder="ช่องทาง" class="border px-2 py-1 rounded">
+                <input type="text" name="contactPerson" placeholder="บุคคลติดต่อ" class="border px-2 py-1 rounded">
+                <input type="text" name="detail" placeholder="รายละเอียด" class="border px-2 py-1 rounded">
+                <input type="text" name="result" placeholder="ผลจากการติดต่อ" class="border px-2 py-1 rounded">
+                <input type="text" name="followUp" placeholder="ติดตามต่อ" class="border px-2 py-1 rounded">
+                <textarea name="note" placeholder="หมายเหตุ" class="border px-2 py-1 rounded col-span-2"></textarea>
+
+                <button id="addCustomerBtn" type="submit"
+                    class="btn-green text-white px-4 py-2 rounded col-span-2">บันทึกข้อมูล</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="updateCustomerModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-orange-100 rounded-xl shadow-soft w-full max-w-xl">
+            <div class="bg-orange-300 text-orange-800 px-4 py-3 rounded-t-xl flex justify-between items-center">
+                <h2 id="modalTitle" class="text-lg font-bold">✏️ แก้ไขข้อมูลลูกค้า</h2>
+                <button onclick="document.getElementById('updateCustomerModal').classList.add('hidden')">✕</button>
+            </div>
+            <form id="updateCustomerForm" class="p-6 grid grid-cols-2 gap-4 text-sm">
+                <input type="hidden" name="customerId" id="updateCustomerId">
+                <input type="text" name="name" placeholder="ชื่อลูกค้า (ไทย)" class="border px-2 py-1 rounded">
+                <input type="text" name="englishName" placeholder="ชื่อลูกค้า (อังกฤษ)" class="border px-2 py-1 rounded"> <input type="text" name="companyName" placeholder="ชื่อบริษัท" class="border px-2 py-1 rounded">
+                <input type="text" name="telephone" placeholder="เบอร์โทรศัพท์" class="border px-2 py-1 rounded">
+                <input type="email" name="email" placeholder="อีเมล" class="border px-2 py-1 rounded">
+                <input type="url" name="companyWebpage" placeholder="เว็บไซต์บริษัท" class="border px-2 py-1 rounded col-span-2">
+                <input type="text" name="group" placeholder="กลุ่ม" class="border px-2 py-1 rounded">
+                <input type="text" name="type" placeholder="ประเภทนักลงทุน" class="border px-2 py-1 rounded">
+                <input type="text" name="investmentType" placeholder="ประเภทการลงทุน" class="border px-2 py-1 rounded">
+                <input type="text" name="channel" placeholder="ช่องทาง" class="border px-2 py-1 rounded">
+                <input type="text" name="contactPerson" placeholder="บุคคลติดต่อ" class="border px-2 py-1 rounded">
+                <input type="text" name="detail" placeholder="รายละเอียด" class="border px-2 py-1 rounded">
+                <input type="text" name="result" placeholder="ผลจากการติดต่อ" class="border px-2 py-1 rounded">
+                <input type="text" name="followUp" placeholder="ติดตามต่อ" class="border px-2 py-1 rounded">
+                <textarea name="note" placeholder="หมายเหตุ" class="border px-2 py-1 rounded col-span-2"></textarea>
+
+                <button id="updateCustomerBtn" type="submit"
+                    class="btn-green text-white px-4 py-2 rounded col-span-2 bg-orange-300 hover:bg-orange-400">อัปเดตข้อมูล</button>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        const SHEET_API = "https://script.google.com/macros/s/AKfycbwKgcJ5bwGXyqQ6mEBdd6w9f8DrAbZG_6tFRDAiTq402eERxml0ULfCl9umlqttsLoHvA/exec";
+
+        //หน้ารายการลูกค้าทั้งหมด
+        async function loadData() {
+            const table = document.getElementById("customerTable");
+            table.innerHTML = `<tr><td colspan="5" class="text-center py-4 loading-text">⏳ กำลังโหลดข้อมูล...</td></tr>`;
+
+            try {
+                const res = await fetch(SHEET_API + "?action=customers");
+                const data = await res.json();
+                table.innerHTML = "";
+                window.customerData = data;
+
+                // ✅ วางตรงนี้ จะได้ค่าแน่นอน
+                console.log("ข้อมูลลูกค้าทั้งหมด:", window.customerData);
+
+                data.forEach((item, index) => {
+                    // Note: The column indices here must match your Google Sheet exactly.
+                    // Assuming new order: [id, name, englishName, companyName, telephone, email, companyWebpage, group, type, investmentType, channel, contactPerson, detail, result, followUp, note]
+                    const customerName = item[1] || "";
+                    const englishName = item[2] || ""; // New: English Name
+                    const companyName = item[3] || ""; // Shifted: Company Name
+                    const displayCustomer = companyName ? `${customerName} (${companyName})` : customerName;
+
+                    const channel = item[10] || ""; // Shifted: Channel
+                    const detail = item[12] || ""; // Shifted: Detail
+                    const result = item[13] || ""; // Shifted: Result
+
+                    const tr = document.createElement("tr");
+                    tr.className = "border-t hover:bg-blue-50 transition";
+                    tr.innerHTML = `
+                        <td class="py-2 px-3">👤 ${displayCustomer}</td>
+                        <td class="px-3">📱 ${channel}</td>
+                        <td class="px-3">${detail}</td>
+                        <td class="px-3">${result}</td>
+                        <td class="px-3 text-blue-600 underline cursor-pointer" onclick="showDetail(${index})">ดูรายละเอียด</td>
+                    `;
+                    table.appendChild(tr);
+                });
+            } catch (err) {
+                console.error("โหลดข้อมูลผิดพลาด:", err);
+                alert("เกิดข้อผิดพลาดในการโหลดข้อมูลลูกค้า");
+            }
+        }
+
+
+        // ฟังก์ชันแสดงรายละเอียดลูกค้า
+        function showDetail(index) {
+            const customer = window.customerData[index]; // ดึงข้อมูลจาก customerData
+            console.log("ข้อมูลลูกค้าที่แสดงในรายละเอียด:", customer); // ตรวจสอบข้อมูลที่เลือก
+
+            if (!customer) {
+                console.error("ไม่พบข้อมูลลูกค้าใน index:", index);
+                return;
+            }
+
+            // Updated indices based on the new customer data structure:
+            // [id, name, englishName, companyName, telephone, email, companyWebpage, group, type, investmentType, channel, contactPerson, detail, result, followUp, note]
+            const detail = `
+                <div><strong>ชื่อลูกค้า (ไทย):</strong> ${customer[1] || ''}</div>
+                <div><strong>ชื่อลูกค้า (อังกฤษ):</strong> ${customer[2] || ''}</div> <div><strong>ชื่อบริษัท:</strong> ${customer[3] || ''}</div>
+                <div><strong>เบอร์โทรศัพท์:</strong> ${customer[4] || ''}</div>
+                <div><strong>อีเมล:</strong> ${customer[5] || ''}</div>
+                <div class="col-span-2"><strong>เว็บไซต์บริษัท:</strong> <a href="${customer[6]}" target="_blank" class="text-blue-600 hover:underline">${customer[6] || ''}</a></div>
+                <div><strong>กลุ่ม:</strong> ${customer[7] || ''}</div>
+                <div><strong>ประเภทนักลงทุน:</strong> ${customer[8] || ''}</div>
+                <div><strong>ประเภทการลงทุน:</strong> ${customer[9] || ''}</div>
+                <div><strong>ช่องทาง:</strong> ${customer[10] || ''}</div>
+                <div><strong>บุคคลติดต่อ:</strong> ${customer[11] || ''}</div>
+                <div><strong>รายละเอียด:</strong> ${customer[12] || ''}</div>
+                <div><strong>ผลจากการติดต่อ:</strong> ${customer[13] || ''}</div>
+                <div><strong>ติดตามต่อ:</strong> ${customer[14] || ''}</div>
+                <div class="col-span-2"><strong>หมายเหตุ:</strong> ${customer[15] || ''}</div>
+                <div class="mt-4 flex gap-4">
+                    <button onclick="openUpdateCustomerModal(${index})" class="bg-yellow-500 text-white px-4 py-2 rounded-xl">แก้ไข</button>
+                    <button onclick="deleteCustomer(${index})" class="bg-red-500 text-white px-4 py-2 rounded-xl">ลบ</button>
+                </div>
+            `;
+            document.getElementById("detailContent").innerHTML = detail;
+            document.getElementById("detailModal").classList.remove("hidden");
+        }
+
+
+        // เพิ่มลูกค้า
+        async function addCustomer(data) {
+            const params = {
+                method: 'POST',
+                body: new URLSearchParams({
+                    action: 'addCustomer',
+                    name: data.name,
+                    englishName: data.englishName, // ✅ Added
+                    companyName: data.companyName,
+                    telephone: data.telephone,
+                    email: data.email,
+                    companyWebpage: data.companyWebpage,
+                    group: data.group,
+                    type: data.type,
+                    investmentType: data.investmentType,
+                    channel: data.channel,
+                    contactPerson: data.contactPerson,
+                    detail: data.detail,
+                    result: data.result,
+                    followUp: data.followUp,
+                    note: data.note
+                })
+            };
+
+            try {
+                const response = await fetch(SHEET_API, params);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const msg = await response.text();
+                alert("เพิ่มข้อมูลลูกค้าสำเร็จ: " + msg);
+                document.getElementById("addCustomerModal").classList.add('hidden');
+                loadData();
+                document.getElementById('addCustomerForm').reset();
+            } catch (error) {
+                console.error("Error:", error);
+                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูลลูกค้า");
+            }
+        }
+
+        document.getElementById('addCustomerForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // หยุดการส่งฟอร์มแบบปกติ
+
+            // ตรวจสอบว่าฟิลด์ที่จำเป็นถูกกรอกหรือไม่
+            const name = document.querySelector('#addCustomerForm input[name="name"]').value;
+            if (!name) {
+                alert("กรุณากรอกชื่อลูกค้า");
+                return;
+            }
+
+            const data = {
+                name: name,
+                englishName: document.querySelector('#addCustomerForm input[name="englishName"]').value, // ✅ Added
+                companyName: document.querySelector('#addCustomerForm input[name="companyName"]').value,
+                telephone: document.querySelector('#addCustomerForm input[name="telephone"]').value,
+                email: document.querySelector('#addCustomerForm input[name="email"]').value,
+                companyWebpage: document.querySelector('#addCustomerForm input[name="companyWebpage"]').value,
+                group: document.querySelector('#addCustomerForm input[name="group"]').value,
+                type: document.querySelector('#addCustomerForm input[name="type"]').value,
+                investmentType: document.querySelector('#addCustomerForm input[name="investmentType"]').value,
+                channel: document.querySelector('#addCustomerForm input[name="channel"]').value,
+                contactPerson: document.querySelector('#addCustomerForm input[name="contactPerson"]').value,
+                detail: document.querySelector('#addCustomerForm input[name="detail"]').value,
+                result: document.querySelector('#addCustomerForm input[name="result"]').value,
+                followUp: document.querySelector('#addCustomerForm input[name="followUp"]').value,
+                note: document.querySelector('#addCustomerForm textarea[name="note"]').value
+            };
+
+            addCustomer(data); // ส่งข้อมูลไปยังฟังก์ชัน addCustomer
+        });
+
+        // ฟังก์ชันลบข้อมูลลูกค้า
+        async function deleteCustomer(index) {
+            const customer = window.customerData[index];
+            const customerId = customer[0];
+
+            if (confirm("คุณแน่ใจว่าจะลบข้อมูลลูกค้ารายนี้?")) {
+                try {
+                    const params = {
+                        method: 'POST',
+                        body: new URLSearchParams({
+                            action: 'deleteCustomer',
+                            customerId: customerId
+                        })
+                    };
+                    const response = await fetch(SHEET_API, params);
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    const msg = await response.text();
+                    alert("ลบข้อมูลลูกค้าสำเร็จ");
+                    loadData();
+                    document.getElementById("detailModal").classList.add('hidden');
+                } catch (error) {
+                    console.error("Error:", error);
+                    alert("เกิดข้อผิดพลาดในการลบข้อมูลลูกค้า");
+                }
+            }
+        }
+
+        // Function to open the update modal and populate fields
+        function openUpdateCustomerModal(index) {
+            const customer = window.customerData[index];
+            if (!customer) {
+                console.error("ไม่พบข้อมูลลูกค้าสำหรับแก้ไขใน index:", index);
+                return;
+            }
+
+            const updateForm = document.getElementById('updateCustomerForm');
+            updateForm.querySelector('input[name="customerId"]').value = customer[0]; // Assuming customer[0] is the ID
+            updateForm.querySelector('input[name="name"]').value = customer[1];
+            updateForm.querySelector('input[name="englishName"]').value = customer[2]; // ✅ Added
+            updateForm.querySelector('input[name="companyName"]').value = customer[3]; // Shifted index
+            updateForm.querySelector('input[name="telephone"]').value = customer[4];   // Shifted index
+            updateForm.querySelector('input[name="email"]').value = customer[5];      // Shifted index
+            updateForm.querySelector('input[name="companyWebpage"]').value = customer[6]; // Shifted index
+            updateForm.querySelector('input[name="group"]').value = customer[7];      // Shifted index
+            updateForm.querySelector('input[name="type"]').value = customer[8];      // Shifted index
+            updateForm.querySelector('input[name="investmentType"]').value = customer[9]; // Shifted index
+            updateForm.querySelector('input[name="channel"]').value = customer[10];     // Shifted index
+            updateForm.querySelector('input[name="contactPerson"]').value = customer[11]; // Shifted index
+            updateForm.querySelector('input[name="detail"]').value = customer[12];     // Shifted index
+            updateForm.querySelector('input[name="result"]').value = customer[13];     // Shifted index
+            updateForm.querySelector('input[name="followUp"]').value = customer[14];    // Shifted index
+            updateForm.querySelector('textarea[name="note"]').value = customer[15];     // Shifted index
+
+            document.getElementById('detailModal').classList.add('hidden');
+            document.getElementById('updateCustomerModal').classList.remove('hidden');
+        }
+
+        // Function to handle updating a customer
+        async function updateCustomer(data) {
+            const params = {
+                method: 'POST',
+                body: new URLSearchParams({
+                    action: 'updateCustomer',
+                    customerId: data.customerId,
+                    name: data.name,
+                    englishName: data.englishName, // ✅ Added
+                    companyName: data.companyName,
+                    telephone: data.telephone,
+                    email: data.email,
+                    companyWebpage: data.companyWebpage,
+                    group: data.group,
+                    type: data.type,
+                    investmentType: data.investmentType,
+                    channel: data.channel,
+                    contactPerson: data.contactPerson,
+                    detail: data.detail,
+                    result: data.result,
+                    followUp: data.followUp,
+                    note: data.note
+                })
+            };
+
+            try {
+                const response = await fetch(SHEET_API, params);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const msg = await response.text();
+                alert("อัปเดตข้อมูลลูกค้าสำเร็จ: " + msg);
+                document.getElementById("updateCustomerModal").classList.add('hidden');
+                loadData();
+            } catch (error) {
+                console.error("Error:", error);
+                alert("เกิดข้อผิดพลาดในการอัปเดตข้อมูลลูกค้า");
+            }
+        }
+
+        document.getElementById('updateCustomerForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Stop default form submission
+
+            const customerId = document.querySelector('#updateCustomerForm input[name="customerId"]').value;
+            const name = document.querySelector('#updateCustomerForm input[name="name"]').value;
+
+            if (!name || !customerId) {
+                alert("กรุณากรอกชื่อลูกค้าและตรวจสอบ ID ลูกค้า");
+                return;
+            }
+
+            const data = {
+                customerId: customerId,
+                name: name,
+                englishName: document.querySelector('#updateCustomerForm input[name="englishName"]').value, // ✅ Added
+                companyName: document.querySelector('#updateCustomerForm input[name="companyName"]').value,
+                telephone: document.querySelector('#updateCustomerForm input[name="telephone"]').value,
+                email: document.querySelector('#updateCustomerForm input[name="email"]').value,
+                companyWebpage: document.querySelector('#updateCustomerForm input[name="companyWebpage"]').value,
+                group: document.querySelector('#updateCustomerForm input[name="group"]').value,
+                type: document.querySelector('#updateCustomerForm input[name="type"]').value,
+                investmentType: document.querySelector('#updateCustomerForm input[name="investmentType"]').value,
+                channel: document.querySelector('#updateCustomerForm input[name="channel"]').value,
+                contactPerson: document.querySelector('#updateCustomerForm input[name="contactPerson"]').value,
+                detail: document.querySelector('#updateCustomerForm input[name="detail"]').value,
+                result: document.querySelector('#updateCustomerForm input[name="result"]').value,
+                followUp: document.querySelector('#updateCustomerForm input[name="followUp"]').value,
+                note: document.querySelector('#updateCustomerForm textarea[name="note"]').value
+            };
+
+            updateCustomer(data);
+        });
+
+        document.addEventListener("DOMContentLoaded", loadData);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>นัดหมาย - CRM</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: #f0f8ff;
+        }
+
+        .bg-main {
+            background-color: #e3f2fd;
+        }
+
+        .text-accent {
+            color: #0288d1;
+        }
+
+        .btn-main {
+            background-color: #81d4fa;
+            color: white;
+            font-weight: 500;
+        }
+
+        .btn-main:hover {
+            background-color: #4fc3f7;
+        }
+
+        .btn-green {
+            background-color: #a5d6a7;
+        }
+
+        .btn-green:hover {
+            background-color: #81c784;
+        }
+
+        .rounded-xl {
+            border-radius: 1rem;
+        }
+
+        .shadow-soft {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .loading-text {
+            color: #0288d1;
+            font-weight: 500;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.3;
+            }
+        }
+    </style>
+    <style>
+        .modal-header {
+            background-color: #e1f5fe;
+            /* ฟ้าอ่อน */
+            color: #0277bd;
+        }
+
+        .hover\:bg-blue-50:hover {
+            background-color: #e3f2fd;
+        }
+
+        .rounded-xl {
+            border-radius: 1rem;
+        }
+
+        .shadow-lg {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+
+    <style>
+        .fc .fc-toolbar-title {
+            font-weight: 600;
+            color: #4a90e2;
+        }
+
+        .fc-button {
+            background-color: #a2d2ff !important;
+            border: none;
+            border-radius: 12px !important;
+            font-weight: bold;
+            color: #003f5c !important;
+        }
+
+        .fc-button:hover {
+            background-color: #90cdf4 !important;
+        }
+
+        .fc-daygrid-day:hover {
+            background-color: #e3f2fd;
+        }
+
+        #appointmentModal .bg-white {
+            background: linear-gradient(to bottom right, #e0f7ff, #ffffff);
+            border-radius: 20px;
+        }
+
+        .event-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 2px;
+        }
+
+        .event-text {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1e3a8a;
+        }
+
+        .fc-daygrid-day-frame {
+            padding: 4px;
+        }
+
+        .bg-gray-50 {
+            background-color: #eaf6ff !important;
+        }
+
+        .text-blue-600 {
+            color: #0077b6 !important;
+        }
+
+        .bg-yellow-400 {
+            background-color: #ffe066 !important;
+            color: #333 !important;
+        }
+
+        .bg-green-600 {
+            background-color: #48cae4 !important;
+            color: white !important;
+        }
+
+        .bg-red-500 {
+            background-color: #ff6b6b !important;
+            color: white !important;
+        }
+
+        .rounded {
+            border-radius: 12px !important;
+        }
+
+        .shadow {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .fc-button {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* ปุ่มปัจจุบันที่ถูก active เช่น view: month / week / day */
+        .fc .fc-button-active {
+            background-color: #7ecbff !important;
+            color: white !important;
+            font-weight: bold;
+            box-shadow: 0 0 0 2px #7ecbff66;
+        }
+
+        /* ปุ่ม today ถ้าอยู่วันนี้ จะ active */
+        .fc .fc-today-button.fc-button-active {
+            background-color: #7ecbff !important;
+            color: white !important;
+            box-shadow: 0 0 0 2px #7ecbff66;
+        }
+
+        .fc-day-today {
+            background-color: #e3f2fd !important;
+            /* สีพื้นของวันนี้ */
+            border-radius: 8px;
+        }
+
+        .fc-daygrid-day.hovered {
+            box-shadow: inset 0 0 0 3px #90caf9 !important;
+            border-radius: 8px;
+        }
+
+        .fc-daygrid-day.fc-day-today.hovered {
+            background-color: #e0f7fa !important;
+            border-radius: 8px;
+            box-shadow: inset 0 0 0 2px #00acc1;
+        }
+    </style>
+
+    <style>
+        .fc-daygrid-day:hover,
+        .fc-daygrid-day.hovered {
+            background-color: #f0f9ff;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .event-indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin: 0 auto;
+            margin-top: 2px;
+        }
+
+        #appointmentModal {
+            z-index: 50;
+        }
+
+        .fc-event-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+        }
+
+        .fc-daygrid-event {
+            display: flex !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100% !important;
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+        }
+
+        /* บังคับความสูงให้แต่ละช่องของ dayGrid มีขนาดเท่ากัน */
+        .fc-daygrid-day-frame {
+            max-height: 80px;
+            /* ความสูงที่ต้องการ */
+            overflow-y: hidden;
+            /* ตัดส่วนเกินออก */
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* กำหนดความสูงเฉพาะส่วนแสดงเหตุการณ์ (อีเวนต์) */
+        .fc-daygrid-day-events {
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+
+        .event-text {
+            font-size: 0.9rem;
+            color: #000000;
+            margin-top: 2px;
+
+            /* ✅ บังคับตัดข้อความใน 1 บรรทัด */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+            display: block;
+            max-width: 100%;
+            width: 100%;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-blue-100 text-blue-900 min-h-screen shadow-md">
+            <div class="px-6 py-4 text-xl font-bold border-b border-blue-200">💼 CRM System</div>
+            <div class="px-6 text-sm mb-4">ระบบจัดการลูกค้า</div>
+            <nav>
+                <ul>
+                    <li><a href="CRM-Dashboard-Layout.html" class="block px-6 py-3 hover:bg-blue-200">📊 Dashboard</a></li>
+                    <li><a href="CRM-Customer-Page.html" class="block px-6 py-3 hover:bg-blue-200">👥 ลูกค้า</a></li>
+                    <li class="block px-6 py-3 bg-blue-200 rounded-l-full">📅 นัดหมาย</li>
+                    <li><a href="#" class="block px-6 py-3 hover:bg-blue-200">📈 รายงาน</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Calendar Section -->
+            <div class="lg:col-span-2 bg-white p-4 rounded shadow">
+                <div class="flex justify-between items-center mb-4">
+                    <h1 class="text-2xl font-bold text-accent">ปฏิทินนัดหมาย</h1>
+                    <button onclick="openNewAppointmentModal()" class="bg-green-600 text-white px-4 py-2 rounded">+
+                        เพิ่มนัดหมาย</button>
+                </div>
+                <div id="calendar"></div>
+            </div>
+
+            <!-- Appointment Detail Panel -->
+            <!-- กล่องขวาทั้งหมด -->
+            <div class="w-full md:w-3/3 space-y-4">
+
+                <!-- 🔔 นัดหมายที่กำลังจะมาถึง -->
+                <div class="bg-white p-4 rounded shadow">
+                    <h2 class="text-lg font-bold mb-4">🔔 นัดหมายที่กำลังจะมาถึง (2 วันข้างหน้า)</h2>
+                    <ul id="upcomingAppointmentsPanel" class="text-sm text-gray-700 space-y-2">
+                        <li class="text-gray-400">กำลังโหลดนัดหมาย...</li>
+                    </ul>
+                </div>
+
+                <!-- 📅 รายละเอียดนัดหมาย -->
+                <div class="bg-white p-4 rounded shadow">
+                    <h2 class="text-lg font-bold mb-4">รายละเอียดนัดหมาย</h2>
+                    <ul id="appointmentList" class="text-sm text-gray-700 space-y-2">
+                        <li class="text-gray-400">เลือกวันที่จากปฏิทินเพื่อดูนัดหมาย</li>
+                    </ul>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Appointment Modal -->
+    <div id="appointmentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded w-full max-w-lg relative z-50">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="appointmentModalTitle" class="text-lg font-bold">เพิ่มนัดหมาย</h2>
+                <button onclick="document.getElementById('appointmentModal').classList.add('hidden')">✕</button>
+            </div>
+            <form id="appointmentForm" class="space-y-3">
+                <input type="date" name="date" class="w-full border px-3 py-2 rounded" required>
+                <select name="customer" id="customerSelect" class="w-full border px-3 py-2 rounded" required>
+                    <option value="">เลือกชื่อลูกค้า</option>
+                </select>
+                <input type="text" name="purpose" class="w-full border px-3 py-2 rounded" placeholder="วัตถุประสงค์">
+                <input type="time" name="time" class="w-full border px-3 py-2 rounded">
+                <textarea name="note" class="w-full border px-3 py-2 rounded h-20" placeholder="หมายเหตุ"></textarea>
+                <select name="status" class="w-full border px-3 py-2 rounded">
+                    <option value="รอดำเนินการ">รอดำเนินการ</option>
+                    <option value="ดำเนินการแล้ว">ดำเนินการแล้ว</option>
+                </select>
+                <button id="appointmentSubmitBtn" type="submit"
+                    class="w-full bg-green-600 text-white py-2 rounded">บันทึกนัดหมาย</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openNewAppointmentModal() {
+            const form = document.getElementById('appointmentForm');
+
+            // เปลี่ยนหัวข้อเป็น "เพิ่มนัดหมาย"
+            document.getElementById('appointmentModalTitle').textContent = 'เพิ่มนัดหมาย';
+            document.getElementById('appointmentSubmitBtn').textContent = 'บันทึกนัดหมาย'; // Reset button text
+
+            // รีเซ็ตฟอร์ม
+            form.reset();
+
+            // ล้างฟิลด์ซ่อน (ถ้ามี)
+            ['originalDate', 'originalCustomer', 'originalTime'].forEach(name => {
+                const el = form.querySelector(`input[name="${name}"]`);
+                if (el) el.remove();
+            });
+
+            // ล้าง data-action (กลับสู่โหมดเพิ่ม)
+            delete form.dataset.action;
+
+            // แสดง Modal
+            document.getElementById('appointmentModal').classList.remove('hidden');
+        }
+
+        const APPOINT_API = "https://script.google.com/macros/s/AKfycbwKgcJ5bwGXyqQ6mEBdd6w9f8DrAbZG_6tFRDAiTq402eERxml0ULfCl9umlqttsLoHvA/exec";
+        const CUSTOMER_API = APPOINT_API + "?action=customers"; // ใช้ API ตัวเดียวกันสำหรับลูกค้า
+
+        function editAppointment(date, customer, purpose, time, note, status) {
+            // ✅ เปลี่ยนหัวข้อและปุ่ม
+            document.getElementById('appointmentModalTitle').textContent = 'แก้ไขนัดหมาย';
+            document.getElementById('appointmentSubmitBtn').textContent = 'อัปเดตนัดหมาย';
+
+            // ✅ เปิด Modal
+            document.getElementById('appointmentModal').classList.remove('hidden');
+
+            const form = document.getElementById('appointmentForm');
+
+            // ✅ ใส่ค่าในฟอร์ม
+            form.date.value = date;
+            form.customer.value = customer;
+            form.purpose.value = purpose;
+
+            let formattedTime = '';
+            if (typeof time === 'string') {
+                // ถ้าเป็นรูปแบบ "18:00:00"
+                if (/^\d{2}:\d{2}(:\d{2})?$/.test(time)) {
+                    formattedTime = time.slice(0, 5); // ได้ "18:00"
+                } else {
+                    const t = new Date(time);
+                    if (!isNaN(t)) {
+                        const hh = t.getHours().toString().padStart(2, '0');
+                        const mm = t.getMinutes().toString().padStart(2, '0');
+                        formattedTime = `${hh}:${mm}`;
+                    }
+                }
+            }
+            form.time.value = formattedTime;
+
+
+            form.note.value = note;
+            form.status.value = status;
+
+            // ✅ ตรวจสอบและสร้าง hidden input หากยังไม่มี
+            ['originalDate', 'originalCustomer', 'originalTime'].forEach(name => {
+                if (!form.querySelector(`input[name="${name}"]`)) {
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = name;
+                    form.appendChild(hidden);
+                }
+            });
+
+            // ✅ กำหนดค่าลงใน hidden input
+            form.querySelector('input[name="originalDate"]').value = date;
+            form.querySelector('input[name="originalCustomer"]').value = customer;
+            let originalTime = '';
+            if (typeof time === 'string' && /^\d{2}:\d{2}/.test(time)) {
+                originalTime = time; // เช่น "13:00"
+            } else {
+                const t = new Date(time);
+                if (!isNaN(t)) {
+                    const hh = t.getHours().toString().padStart(2, '0');
+                    const mm = t.getMinutes().toString().padStart(2, '0');
+                    originalTime = `${hh}:${mm}`;
+                }
+            }
+            form.querySelector('input[name="originalTime"]').value = originalTime;
+
+            // ✅ กำหนดให้ form อยู่ในโหมด update
+            form.setAttribute('data-action', 'update');
+
+        }
+
+        let calendar;
+        let allAppointments = [];
+        let appointmentList;
+        let upcomingAppointmentsPanel; // เพิ่มตัวแปรสำหรับ panel นัดหมายที่กำลังจะมาถึง
+
+        function deleteAppointment(date, customer, time) {
+            // แทนที่ confirm() ด้วย modal ที่สร้างเอง
+            const confirmationModal = createConfirmationModal(`คุณต้องการลบนัดหมายของ ${customer} ใช่หรือไม่?`);
+            document.body.appendChild(confirmationModal);
+
+            confirmationModal.querySelector('#confirmDeleteBtn').onclick = () => {
+                confirmationModal.remove(); // ปิด modal
+                fetch(APPOINT_API, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        action: 'deleteAppointment',
+                        date,
+                        customer,
+                        time
+                    })
+                })
+                    .then(res => res.text())
+                    .then(msg => {
+                        alert("ลบนัดหมายเรียบร้อยแล้ว");
+
+                        // ✅ โหลดข้อมูลใหม่หลังลบ
+                        fetch(APPOINT_API + "?action=appointments")
+                            .then(res => res.json())
+                            .then(data => {
+                                allAppointments = data;
+
+                                // ✅ อัปเดตปฏิทิน
+                                calendar.refetchEvents();
+
+                                // ✅ แสดงข้อมูลฝั่งขวาใหม่
+                                showAppointmentsForDate(date);
+                                loadUpcomingAppointments(); // โหลดนัดหมายที่กำลังจะมาถึงใหม่
+                            });
+                    })
+                    .catch(error => {
+                        console.error("Error deleting appointment:", error);
+                        alert("เกิดข้อผิดพลาดในการลบนัดหมาย");
+                    });
+            };
+
+            confirmationModal.querySelector('#cancelDeleteBtn').onclick = () => {
+                confirmationModal.remove(); // ปิด modal
+            };
+        }
+
+        // ฟังก์ชันสร้าง Modal ยืนยัน (แทนที่ confirm())
+        function createConfirmationModal(message) {
+            const modal = document.createElement('div');
+            modal.id = 'confirmationModal';
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                    <p class="text-center text-lg mb-4">${message}</p>
+                    <div class="flex justify-center space-x-4">
+                        <button id="confirmDeleteBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">ยืนยัน</button>
+                        <button id="cancelDeleteBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md">ยกเลิก</button>
+                    </div>
+                </div>
+            `;
+            return modal;
+        }
+
+
+        function showAppointmentsForDate(dateStr) {
+            const filtered = allAppointments.filter(row => row[0] === dateStr);
+            appointmentList.innerHTML = filtered.length > 0
+                ? filtered.map(row => {
+                    const rawTime = row[3];
+                    let timeStr = '-';
+                    if (rawTime) {
+                        if (typeof rawTime === 'string' && /^\d{2}:\d{2}(:\d{2})?$/.test(rawTime)) {
+                            timeStr = rawTime.slice(0, 5) + ' น.';
+                        } else {
+                            const d = new Date(rawTime);
+                            if (!isNaN(d)) {
+                                const h = d.getHours().toString().padStart(2, '0');
+                                const m = d.getMinutes().toString().padStart(2, '0');
+                                timeStr = `${h}:${m} น.`;
+                            }
+                        }
+                    }
+
+                    return `
+                        <li class="border border-gray-200 p-2 rounded bg-gray-50 relative">
+                            <strong class="text-blue-600">${row[1]}</strong>
+                            <div class="text-sm text-gray-700">วันที่: ${row[0]}</div>
+                            <div class="text-sm text-gray-700">เวลา: ${timeStr}</div>
+                            <div class="text-sm text-gray-700">วัตถุประสงค์: ${row[2] || '-'}</div>
+                            <div class="text-sm text-gray-500">หมายเหตุ: ${row[4] || '-'}</div>
+                            <div class="text-sm ${row[5] === 'ดำเนินการแล้ว' ? 'text-green-600' : 'text-yellow-600'}">
+                                สถานะ: ${row[5] || '-'}
+                            </div>
+
+                            <!-- ✅ กลุ่มปุ่มอยู่ติดกัน -->
+                            <div class="absolute bottom-2 right-2 flex gap-2">
+                                <button onclick="editAppointment('${row[0]}', '${row[1]}', '${row[2]}', '${row[3]}', '${row[4]}', '${row[5]}')"
+                                    class="text-xs bg-yellow-400 hover:bg-yellow-500 text-white px-2 py-1 rounded">
+                                    แก้ไข
+                                </button>
+                                <button onclick="deleteAppointment('${row[0]}', '${row[1]}', '${row[3]}')"
+                                    class="text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded">
+                                    ลบ
+                                </button>
+                            </div>
+                        </li>`;
+
+                }).join('')
+                : '<li class="text-gray-400">ไม่มีนัดหมายในวันนี้</li>';
+        }
+
+        // ฟังก์ชันสำหรับโหลดและแสดงนัดหมายที่กำลังจะมาถึง
+        async function loadUpcomingAppointments() {
+            upcomingAppointmentsPanel.innerHTML = '<li class="text-gray-400">กำลังโหลดนัดหมาย...</li>';
+            try {
+                const res = await fetch(APPOINT_API + "?action=getUpcomingAppointments");
+                const data = await res.json();
+
+                if (data.length > 0) {
+                    upcomingAppointmentsPanel.innerHTML = data.map(row => {
+                        const rawTime = row[3];
+                        let timeStr = '-';
+                        if (rawTime) {
+                            if (typeof rawTime === 'string' && /^\d{2}:\d{2}(:\d{2})?$/.test(rawTime)) {
+                                timeStr = rawTime.slice(0, 5) + ' น.';
+                            } else {
+                                const d = new Date(rawTime);
+                                if (!isNaN(d)) {
+                                    const h = d.getHours().toString().padStart(2, '0');
+                                    const m = d.getMinutes().toString().padStart(2, '0');
+                                    timeStr = `${h}:${m} น.`;
+                                }
+                            }
+                        }
+                        return `
+                            <li class="border border-blue-200 p-2 rounded bg-blue-50">
+                                <strong class="text-blue-700">${row[1]}</strong>
+                                <div class="text-sm text-gray-700">วันที่: ${row[0]}</div>
+                                <div class="text-sm text-gray-700">เวลา: ${timeStr}</div>
+                                <div class="text-sm text-gray-700">วัตถุประสงค์: ${row[2] || '-'}</div>
+                                <div class="text-sm ${row[5] === 'ดำเนินการแล้ว' ? 'text-green-600' : 'text-yellow-600'}">
+                                    สถานะ: ${row[5] || '-'}
+                                </div>
+                            </li>
+                        `;
+                    }).join('');
+                } else {
+                    upcomingAppointmentsPanel.innerHTML = '<li class="text-gray-400">ไม่มีนัดหมายที่กำลังจะมาถึงใน 2 วันนี้</li>';
+                }
+            } catch (err) {
+                console.error("โหลดนัดหมายที่กำลังจะมาถึงผิดพลาด:", err);
+                upcomingAppointmentsPanel.innerHTML = '<li class="text-red-500">เกิดข้อผิดพลาดในการโหลดนัดหมายที่กำลังจะมาถึง</li>';
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('calendar');
+            const dateInput = document.querySelector('input[name="date"]');
+            const customerSelect = document.getElementById('customerSelect');
+            appointmentList = document.getElementById('appointmentList');
+            upcomingAppointmentsPanel = document.getElementById('upcomingAppointmentsPanel'); // กำหนดค่าให้กับตัวแปร
+
+            fetch(CUSTOMER_API)
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(row => {
+                        const name = row[1];
+                        if (name) {
+                            const option = document.createElement('option');
+                            option.value = name;
+                            option.textContent = name;
+                            customerSelect.appendChild(option);
+                        }
+                    });
+                });
+
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+
+                initialView: 'dayGridMonth',
+                locale: 'th',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                events: fetchAppointments,
+                eventDidMount: function (info) {
+                    const row = allAppointments.find(r =>
+                        r[0] === info.event.startStr.split('T')[0] &&
+                        r[1] === info.event.title
+                    );
+
+                    let dotColor = 'gray';
+                    if (row) {
+                        if (row[5] === 'ดำเนินการแล้ว') {
+                            dotColor = 'green';
+                        } else if (row[5] === 'รอดำเนินการ') {
+                            dotColor = 'orange';
+                        }
+                    }
+
+                    info.el.innerHTML = `
+            <div class="fc-event-center">
+                <div class="event-indicator" style="background-color: ${dotColor}; width: 8px; height: 8px; border-radius: 50%; margin: 0 auto; margin-top: 2px;"></div>
+                <div class="event-text">${info.event.title}</div>
+            </div>
+            `;
+                },
+
+
+
+
+                dateClick: function (info) {
+                    const clickedDate = info.dateStr;
+                    const calendarApi = calendar;
+
+                    // 👉 บังคับให้เปลี่ยนเดือนถ้าคลิกวันที่อยู่นอกเดือนปัจจุบัน
+                    const clickedMonth = new Date(clickedDate).getMonth();
+                    const currentMonth = calendarApi.getDate().getMonth();
+
+                    if (clickedMonth !== currentMonth) {
+                        calendarApi.gotoDate(clickedDate); // ✅ เลื่อนปฏิทินไปเดือนใหม่
+                    }
+
+                    // ✅ ตั้งค่า input และไฮไลต์
+                    if (dateInput) {
+                        dateInput.value = clickedDate;
+                        dateInput.focus();
+                    }
+
+                    document.querySelectorAll(".fc-daygrid-day").forEach(cell => cell.classList.remove("hovered"));
+                    info.dayEl.classList.add("hovered");
+                    showAppointmentsForDate(clickedDate);
+
+                    enableTodayButtonIfNeeded(); // ✅ เปิดปุ่ม today ถ้าเลือกวันอื่น
+                    toggleTodayButtonState(); // ✅ ตรวจสอบใหม่ว่าควร disable หรือไม่
+                },
+                eventClick: function (info) {
+                    const date = info.event.startStr.split('T')[0]; // เอาแค่วันที่
+                    showAppointmentsForDate(date);
+                    document.querySelectorAll(".fc-daygrid-day").forEach(cell => cell.classList.remove("hovered"));
+
+                    // ไฮไลต์ช่องวันที่ที่คลิกผ่าน event
+                    const dayCell = document.querySelector(`[data-date="${date}"]`);
+                    if (dayCell) {
+                        dayCell.classList.add("hovered");
+                    }
+                },
+                eventContent: function (arg) {
+                    return {
+                        html: `
+            <div class="fc-event-center">
+                <div class="event-indicator"></div>
+                <div class="event-text">${arg.event.title}</div>
+            </div>
+            `
+                    };
+                },
+
+            });
+
+
+            // ฟังก์ชันเปิดปุ่ม Today ถ้ามีการเลือกวันอื่นที่ไม่ใช่วันนี้
+            function enableTodayButtonIfNeeded() {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const hovered = document.querySelector('.fc-daygrid-day.hovered');
+                const selectedDate = hovered?.dataset.date;
+
+                if (selectedDate !== todayStr) {
+                    const todayBtn = document.querySelector('.fc-today-button');
+                    if (todayBtn?.disabled) {
+                        todayBtn.disabled = false; // ✅ เปิดให้กด
+                        todayBtn.classList.remove('fc-button-disabled'); // ✅ ลบ class ที่ทำให้ดูจาง
+                    }
+                }
+            }
+
+            function toggleTodayButtonState() {
+                const todayStr = new Date().toISOString().split('T')[0];
+                const hovered = document.querySelector('.fc-daygrid-day.hovered');
+                const selectedDate = hovered?.dataset.date;
+
+                const todayBtn = document.querySelector('.fc-today-button');
+                if (!todayBtn) return;
+
+                if (selectedDate === todayStr) {
+                    todayBtn.disabled = true;
+                    todayBtn.classList.add('fc-button-disabled');
+                } else {
+                    todayBtn.disabled = false;
+                    todayBtn.classList.remove('fc-button-disabled');
+                }
+            }
+
+
+            calendar.render();
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayCell = document.querySelector(`.fc-daygrid-day[data-date="${todayStr}"]`);
+
+            if (todayCell) {
+                todayCell.classList.add("hovered");
+                showAppointmentsForDate(todayStr);
+
+                if (dateInput) {
+                    dateInput.value = todayStr;
+                    dateInput.focus();
+                }
+
+                toggleTodayButtonState(); // เพื่อ disable ปุ่มถ้าวันนี้ถูกเลือก
+            }
+
+            // ✅ เพิ่มฟังก์ชันกด Today แล้วแสดงข้อมูลวันนี้ + hover
+            document.querySelector('.fc-today-button')?.addEventListener('click', () => {
+                const today = new Date();
+                const todayStr = today.toISOString().split('T')[0];
+                const calendarMonth = calendar.getDate().getMonth();
+                const todayMonth = today.getMonth();
+
+                console.log("📌 ปุ่ม Today ถูกกด");
+                console.log("🗓️ วันนี้คือ:", todayStr);
+                console.log("📆 เดือนปฏิทินปัจจุบัน:", calendarMonth + 1); // +1 เพื่อให้อ่านง่าย
+                console.log("📆 เดือนของวันนี้:", todayMonth + 1);
+
+                if (calendarMonth === todayMonth) {
+                    // ✅ ถ้าอยู่เดือนปัจจุบัน
+                    setTimeout(() => {
+                        // ลบ hover เดิม
+                        document.querySelectorAll(".fc-daygrid-day").forEach(cell => cell.classList.remove("hovered"));
+
+                        // หาและเพิ่ม hover วันที่ปัจจุบัน
+                        const todayCell = document.querySelector(`.fc-daygrid-day[data-date="${todayStr}"]`);
+                        if (todayCell) {
+                            todayCell.classList.add("hovered"); // เพิ่ม hover วันที่วันนี้
+                            todayCell.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }
+
+                        // โหลดข้อมูลวันปัจจุบัน
+                        showAppointmentsForDate(todayStr);
+
+                        // รีเซ็ตค่าในฟอร์ม input (ถ้ามี)
+                        const dateInput = document.querySelector('input[name="date"]');
+                        if (dateInput) {
+                            dateInput.value = todayStr;
+                            dateInput.focus();
+                        }
+
+                        // จัดการสถานะปุ่ม Today
+                        toggleTodayButtonState();
+                    }, 100);
+                } else {
+                    // ✅ ถ้าอยู่เดือนอื่น จะเปลี่ยนเดือนแล้วไปที่วันนี้
+                    calendar.gotoDate(today); // ไปที่วันนี้
+                    setTimeout(() => {
+                        document.querySelectorAll(".fc-daygrid-day").forEach(cell => cell.classList.remove("hovered"));
+
+                        const todayCell = document.querySelector(`.fc-daygrid-day[data-date="${todayStr}"]`);
+                        if (todayCell) {
+                            todayCell.classList.add("hovered"); // เพิ่ม hover วันที่วันนี้
+                            todayCell.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }
+
+                        showAppointmentsForDate(todayStr);
+                        toggleTodayButtonState(); // จัดการสถานะปุ่ม Today
+                    }, 200); // ให้เวลา FullCalendar รีเฟรชปฏิทินก่อน
+                }
+            });
+
+
+            toggleTodayButtonState();
+
+            showAppointmentsForDate(new Date().toISOString().split('T')[0]);
+            loadUpcomingAppointments(); // เรียกโหลดนัดหมายที่กำลังจะมาถึงเมื่อโหลดหน้าเว็บ
+
+            document.getElementById('appointmentForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const form = e.target;
+                const formData = new FormData(form);
+
+                const action = form.getAttribute('data-action') === 'update' ? 'updateAppointment' : 'addAppointment';
+
+
+                formData.append('action', action);
+                console.log([...formData]); // เช็คว่ามี originalDate, originalCustomer, originalTime หรือไม่
+                for (let [key, val] of formData.entries()) {
+                    console.log(`${key}: ${val}`);
+                }
+                fetch(APPOINT_API, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(res => res.text())
+                    .then(msg => {
+                        console.log("🟢 อัปเดตสำเร็จ:", msg);
+
+                        alert(action === 'updateAppointment' ? 'แก้ไขนัดหมายเรียบร้อยแล้ว' : 'บันทึกนัดหมายเรียบร้อยแล้ว');
+
+                        const updatedDate = form.date.value;
+
+                        console.log("📆 วันที่ที่อัปเดต:", updatedDate);
+                        console.log("⏳ เริ่มโหลดข้อมูลใหม่จาก Sheet...");
+
+                        // 1. โหลดข้อมูลใหม่หลังจากอัปเดต
+                        fetch(APPOINT_API + "?action=appointments")
+                            .then(res => res.json())
+                            .then(data => {
+                                console.log("✅ ได้ข้อมูล appointments ใหม่แล้ว:", data);
+
+                                allAppointments = data;
+
+                                // 2. รีเฟรชปฏิทิน (dot สีจะอิง allAppointments)
+                                console.log("🔄 เรียก calendar.refetchEvents()...");
+                                calendar.refetchEvents();
+
+                                // 3. รอให้ปฏิทิน render เสร็จ แล้วค่อยแสดงฝั่งขวา
+                                setTimeout(() => {
+                                    console.log("📋 เรียก showAppointmentsForDate():", updatedDate);
+                                    showAppointmentsForDate(updatedDate);
+                                    loadUpcomingAppointments(); // โหลดนัดหมายที่กำลังจะมาถึงใหม่
+
+                                    // ✅ เพิ่มส่วนนี้: เปลี่ยน class hovered ไปยังวันที่ใหม่
+                                    document.querySelectorAll(".fc-daygrid-day").forEach(cell => cell.classList.remove("hovered"));
+                                    const newDayCell = document.querySelector(`[data-date="${updatedDate}"]`);
+                                    if (newDayCell) {
+                                        newDayCell.classList.add("hovered");
+                                    }
+
+                                }, 500);
+                            });
+
+                        // 4. ปิด modal และ reset form
+                        document.getElementById('appointmentModal').classList.add('hidden');
+                        form.reset();
+                        form.removeAttribute('data-action');
+                    })
+                    .catch(error => {
+                        console.error("Error submitting appointment:", error);
+                        alert("เกิดข้อผิดพลาดในการบันทึก/แก้ไขนัดหมาย");
+                    });
+            });
+
+            function fetchAppointments(fetchInfo, successCallback, failureCallback) {
+                fetch(APPOINT_API + "?action=appointments")
+                    .then(res => res.json())
+                    .then(data => {
+                        allAppointments = data;
+
+                        const events = data.map(row => {
+                            const date = row[0];    // วันที่
+                            const name = row[1];    // ลูกค้า
+                            const purpose = row[2]; // วัตถุประสงค์
+                            const rawTime = row[3]; // เวลา
+                            const note = row[4];    // หมายเหตุ
+                            const status = row[5];  // สถานะ
+
+                            let timeStr = "";
+                            let start = date;
+                            let allDay = true;
+
+                            // แปลงเวลาให้กลายเป็น HH:mm
+                            if (rawTime) {
+                                if (typeof rawTime === "string" && /^\d{2}:\d{2}/.test(rawTime)) {
+                                    timeStr = rawTime;
+                                } else {
+                                    const t = new Date(rawTime);
+                                    if (!isNaN(t)) {
+                                        const h = t.getHours().toString().padStart(2, '0');
+                                        const m = t.getMinutes().toString().padStart(2, '0');
+                                        timeStr = `${h}:${m}`;
+                                    }
+                                }
+
+                                if (timeStr) {
+                                    start = `${date}T${timeStr}:00`;
+                                    allDay = false;
+                                }
+                            }
+
+                            return {
+                                title: name || 'นัด',
+                                start,
+                                allDay
+                            };
+                        });
+
+                        successCallback(events);
+
+                        // ✅ เพิ่ม: เมื่อโหลดเสร็จ ให้แสดงข้อมูลของวันปัจจุบัน
+                        const todayStr = new Date().toISOString().split('T')[0];
+                        const todayCell = document.querySelector(`.fc-daygrid-day[data-date="${todayStr}"]`);
+                        if (todayCell) {
+                            todayCell.classList.add("hovered");
+                        }
+                        showAppointmentsForDate(todayStr);
+
+                        if (dateInput) {
+                            dateInput.value = todayStr;
+                            dateInput.focus();
+                        }
+
+                        toggleTodayButtonState(); // เพื่อจัดการปุ่ม Today (ถ้าอยู่วันปัจจุบันให้ disable)
+                        todayCell?.scrollIntoView({ behavior: "smooth", block: "center" });
+
+
+                    })
+                    .catch(failureCallback);
+            }
+
+
+
+        });
+    </script>
+</body>
+
+</html>
